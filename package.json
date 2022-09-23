@@ -1,0 +1,40 @@
+{
+  "name": "web_base",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "vue-cli-service serve",
+    "build:dev": "vue-cli-service build --mode development",
+    "build:test": "vue-cli-service build --mode devtest",
+    "build:uat": "vue-cli-service build --mode uat",
+    "build:prod": "vue-cli-service build --mode production"
+  },
+  "dependencies": {
+    "core-js": "^3.8.3",
+    "default-passive-events": "^2.0.0",
+    "qiankun": "^2.7.4",
+    "vue": "^2.6.14",
+    "vue-router": "^3.5.1",
+    "vuex": "^3.6.2"
+  },
+  "devDependencies": {
+    "@vue/cli-plugin-babel": "~5.0.0",
+    "@vue/cli-plugin-router": "~5.0.0",
+    "@vue/cli-plugin-vuex": "~5.0.0",
+    "@vue/cli-service": "~5.0.0",
+    "axios": "^0.27.2",
+    "element-ui": "^2.15.9",
+    "js-cookie": "^3.0.1",
+    "js-sha256": "^0.9.0",
+    "quill": "^1.3.7",
+    "sass": "^1.32.7",
+    "sass-loader": "^12.0.0",
+    "svg-sprite-loader": "^6.0.11",
+    "vue-template-compiler": "^2.6.14"
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead"
+  ]
+}
