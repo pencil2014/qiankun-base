@@ -25,7 +25,6 @@
 <script>
 import actions from '@/store'
 export default {
-  inject: ['scrollToTag'],
   name: 'sidebar-item',
   props: {
     subMenu: {
@@ -73,7 +72,6 @@ export default {
           url
         })
       }
-      this.scrollToTag()
       history.pushState(null, '', `/web-main/#${url}`)
     }
   },

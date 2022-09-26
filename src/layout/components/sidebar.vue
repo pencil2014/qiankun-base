@@ -25,7 +25,6 @@ import { getMenu } from '@/api'
 import SidebarItem from './sidebarItem.vue'
 import settings from '@/settings'
 export default {
-  inject: ['scrollToTag'],
   components: {
     SidebarItem
   },
@@ -86,7 +85,6 @@ export default {
           url
         })
       }
-      this.scrollToTag()
       history.pushState(null, '', `/web-main/#${url}`)
     },
     getAllMenu() {

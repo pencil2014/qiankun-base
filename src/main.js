@@ -88,6 +88,9 @@ registerMicroApps(apps, {
   },
   beforeMount: [
     (app) => {
+      store.setGlobalState({
+        appName: app.name
+      })
       console.log('[LifeCycle] before mount %c%s', 'color: green;', app.name)
     }
   ],

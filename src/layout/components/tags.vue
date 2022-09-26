@@ -1,21 +1,28 @@
 <template>
   <div class="tags-cnt">
-    <el-scrollbar @wheel.native.prevent="handleScroll" ref="scrollContainer">
-    <ul>
-      <li
-        v-for="(item, index) in state.tags"
-        @click="goSub(item)"
-        @contextmenu.prevent="openMenu(item, $event)"
-        :class="{ active: item.code === (state.activeTag && state.activeTag.code) }"
-      >
-        {{ item.title }}
-        <i
-          class="el-icon-close"
-          v-show="state.tags.length > 1 || index !== 0"
-          @click.stop="close(item)"
-        ></i>
-      </li>
-    </ul>
+    <el-scrollbar
+      @wheel.native.prevent="handleScroll"
+      ref="scrollContainer"
+      class="tag-srollbar-cnt"
+    >
+      <ul>
+        <li
+          v-for="(item, index) in state.tags"
+          @click="goSub(item)"
+          @contextmenu.prevent="openMenu(item, $event)"
+          :class="{
+            'tag-active':
+              item.code === (state.activeTag && state.activeTag.code)
+          }"
+        >
+          {{ item.title }}
+          <i
+            class="el-icon-close"
+            v-show="state.tags.length > 1 || index !== 0"
+            @click.stop="close(item)"
+          ></i>
+        </li>
+      </ul>
     </el-scrollbar>
     <ul
       v-show="visible"
@@ -33,6 +40,7 @@
 <script>
 import actions from '@/store'
 export default {
+  inject: ['scrollToTag'],
   data() {
     return {
       left: '',
@@ -42,21 +50,63 @@ export default {
       state: {}
     }
   },
-  // computed: {
-  //   state() {
-  //     return actions.getGlobalState()
-  //   }
-  // },
   watch: {
     visible(value) {
-			if (value) {
-				document.body.addEventListener('click', this.closeMenu)
-			} else {
-				document.body.removeEventListener('click', this.closeMenu)
-			}
-		}
+      if (value) {
+        document.body.addEventListener('click', this.closeMenu)
+      } else {
+        document.body.removeEventListener('click', this.closeMenu)
+      }
+    },
+    $route(value) {
+      // 新开tag
+      let { url } = this.state.activeTag
+      let { fullPath, path, name } = value
+      if (url !== fullPath) {
+        let tag = {}
+        // 子应用
+        if (!value.name) {
+          let sub = path.split('/')
+          let { appName, subRouters } = this.state
+          let source = this.findRouter(subRouters[appName], sub.at(-1))
+          tag = {
+            title: source.meta?.title,
+            code: source.name,
+            url: fullPath
+          }
+        } else {
+          // 主应用
+          tag = {
+            title: name,
+            code: name,
+            url: fullPath
+          }
+        }
+        actions.setGlobalState({
+          activeTag: tag
+        })
+        actions.addGlobalTag(tag)
+      }
+      this.scrollToTag()
+    }
   },
   methods: {
+    findRouter(routes, path) {
+      let res = null
+      routes.forEach((item) => {
+        if (item.children) {
+          let find = this.findRouter(item.children, path)
+          if (find) {
+            res = find
+          }
+        } else {
+          if (item.path === path) {
+            res = item
+          }
+        }
+      })
+      return res
+    },
     handleScroll(e) {
       const eventDelta = e.wheelDelta || -e.deltaY * 40
       const $scrollWrapper = this.$refs.scrollContainer.$refs.wrap
@@ -83,17 +133,19 @@ export default {
       let orign = location.origin
       window.open(`${orign}/web-main/#${url}`, '_black')
     },
-    closeAllTags () {
+    closeAllTags() {
       let home = {
-        title:'首页', code: 'Home', url: '/home'
+        title: '首页',
+        code: 'Home',
+        url: '/home'
       }
-      let tags = [{...home}]
-      let activeTag = {...home}
+      let tags = [{ ...home }]
+      let activeTag = { ...home }
       actions.setGlobalState({ tags, activeTag })
-      return this.$router.push({name: 'Home'})
+      return this.$router.push({ name: 'Home' })
     },
     closeSelectedTag() {
-      let len =  this.state.tags.length
+      let len = this.state.tags.length
       if (len < 2) {
         return this.closeAllTags()
       }
@@ -106,7 +158,7 @@ export default {
         let active = tags.slice(-1)[0]
         actions.setGlobalState({ activeTag: active })
       }
-      history.pushState(null, '',  `/web-main/#${this.state.activeTag.url}`)
+      history.pushState(null, '', `/web-main/#${this.state.activeTag.url}`)
     },
     closeOthersTags() {
       this.activeTag = this.selectedTag
@@ -115,13 +167,13 @@ export default {
         tags: this.tags,
         activeTag: this.activeTag
       })
-      history.pushState(null, '',  `/web-main/#${this.activeTag.url}`)
+      history.pushState(null, '', `/web-main/#${this.activeTag.url}`)
     },
     closeMenu() {
-			this.visible = false
-		},
+      this.visible = false
+    }
   },
-  mounted () {
+  mounted() {
     this.state = actions.getGlobalState()
   }
 }
@@ -153,13 +205,13 @@ export default {
         background-color: #b4bccc;
         color: #fff;
       }
-      &.active {
+      &.tag-active {
         background-color: #f5f7f9;
         color: #333;
       }
     }
   }
-  .contextmenu{
+  .contextmenu {
     display: flex;
     flex-direction: column;
     margin: 0;
@@ -175,11 +227,11 @@ export default {
     -webkit-box-shadow: 2px 2px 3px 0 rgb(0 0 0 / 30%);
     box-shadow: 2px 2px 3px 0 rgb(0 0 0 / 30%);
     width: 80px;
-    li{
+    li {
       color: #333;
       cursor: pointer;
       margin: 0;
-      &:hover{
+      &:hover {
         background-color: #eee;
       }
     }

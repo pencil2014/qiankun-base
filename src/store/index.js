@@ -6,12 +6,14 @@ import Vue from 'vue'
 const initialState = Vue.observable({
   userInfo: {},
   token: '',
-  expireTimes: 30 * 60 * 1000,   // token有效期30分钟
+  expireTimes: 30 * 60 * 1000, // token有效期30分钟
   allMenu: [],
-  tags: [{title:'首页', code: 'Home', url: '/home'}],
-  activeTag: {title:'首页', code: 'Home', url: '/home'},
+  tags: [{ title: '首页', code: 'Home', url: '/home' }],
+  activeTag: { title: '首页', code: 'Home', url: '/home' },
   isCollapse: false,
-  dictAll: []
+  dictAll: [],
+  appName: '',
+  subRouters: {},
 })
 
 const actions = initGlobalState(initialState) || initialState
@@ -21,6 +23,7 @@ actions.onGlobalStateChange((state, prev) => {
   for (const key in state) {
     initialState[key] = state[key]
   }
+  console.log(1111111111111111,initialState)
 })
 
 actions.setGlobalState = (data) => {
@@ -40,6 +43,14 @@ actions.getGlobalState = (key) => {
     initialState.userInfo = JSON.parse(userInfo || '{}')
   }
   return key ? initialState[key] : initialState
+}
+
+actions.addGlobalTag = (tag) => {
+  initialState.activeTag = tag
+  let codes = initialState.tags.map((ele) => ele.code)
+  if (!codes.includes(tag.code)) {
+    initialState.tags.push(tag)
+  }
 }
 
 export default actions

@@ -53,8 +53,8 @@ export default {
     },
     scrollToTag () {
       this.$nextTick(()=> {
-        let tag = document.getElementsByClassName('active')[0]
-        let warp = document.getElementsByClassName('el-scrollbar__wrap')[0]
+        let tag = document.getElementsByClassName('tag-active')[0]
+        let warp = document.getElementsByClassName('tag-srollbar-cnt')[0].getElementsByClassName('el-scrollbar__wrap')[0]
         let { clientWidth, offsetLeft } = tag
         let tagLeft = clientWidth + offsetLeft
         let warpLeft = warp.clientWidth + warp.scrollLeft
