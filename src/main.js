@@ -1,9 +1,11 @@
 import Vue from 'vue'
-import { registerMicroApps, start, setDefaultMountApp, runAfterFirstMounted  } from 'qiankun'
+import { registerMicroApps, start, setDefaultMountApp, runAfterFirstMounted, addGlobalUncaughtErrorHandler   } from 'qiankun'
 import microApps from './micro-app'
 import App from './App.vue'
 import router from './router'
 import store from './store'
+import { getTokenCookie } from '@/utils'
+import { getInfo, getDictList } from '@/api'
 import 'default-passive-events'
 import ElementUI from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css'
@@ -12,12 +14,6 @@ import '@/icons'
 Vue.use(ElementUI)
 
 Vue.config.productionTip = false
-
-const instance = new Vue({
-  router,
-  store,
-  render: (h) => h(App)
-}).$mount('#app')
 
 // 全局方法
 Vue.prototype.$msgSucClose = (message, duration) =>
@@ -52,6 +48,12 @@ Vue.prototype.$confirmWarn = (message, callback, callback2) =>
       callback2 && callback2()
     })
 
+const instance = new Vue({
+  router,
+  store,
+  render: (h) => h(App)
+}).$mount('#app')
+
 function loader(loading) {
   if (instance && instance.$children) {
     // instance.$children[0] 是App.vue，此时直接改动App.vue的isLoading
@@ -66,7 +68,16 @@ const apps = microApps.map((item) => {
     loader
   }
 })
-
+// 添加全局的未捕获异常处理器。
+addGlobalUncaughtErrorHandler((event) => {
+  ElementUI.Message({
+    type: 'warning',
+    message: event.message || event.reason.message,
+    showClose: true,
+    duration: 3000
+  })
+  instance.$children[0].isLoading = false
+})
 // 路由拦截处理404
 // const childrenPath = ['wms'] // 子系统分配的路由
 // router.beforeEach((to, from, next) => {
@@ -105,17 +116,45 @@ registerMicroApps(apps, {
     }
   ]
 })
-let token = localStorage.getItem('token')
+
+function getUserInfo (token) {
+  getInfo(token).then(res => {
+    let userInfo = res.data
+    localStorage.setItem('userInfo', JSON.stringify(userInfo))
+    store.setGlobalState({
+      userInfo
+    })
+  }).catch(() => {})
+  .finally(() => {})
+}
+
+function getDict() {
+  getDictList()
+    .then((res) => {
+      let dictAll = res.data
+      localStorage.setItem('dictAll', JSON.stringify(dictAll))
+      store.setGlobalState({
+        dictAll
+      })
+    })
+    .catch(() => {})
+}
+let userInfo = localStorage.getItem('userInfo')
+let token = localStorage.getItem('token') || getTokenCookie()
 let url = '/web-main/#/home'
 if (token) {
   url = '/web-main/' + (location.hash === '#/' ? '#/home' : location.hash)
+  if (!userInfo) {
+    getUserInfo(token)
+    getDict()
+  }
 } else {
+  sessionStorage.setItem('lastUrlNoLogin', location.href)
   url = '/web-main/#/login'
 }
 setDefaultMountApp(url)
 start({
-  prefetch: 'all',
-  singular: false,
+  prefetch: 'all'
 })
 // 第一个微应用 mount 后
 // runAfterFirstMounted(()=>{})

@@ -171,6 +171,12 @@ export default {
             actions.setGlobalState({
               userInfo
             })
+            // let url = sessionStorage.getItem('lastUrlNoLogin')
+            // if (url && !url.includes('/login')) {
+            //   location.href = url
+            // } else {
+            //   this.$router.push({ name: 'Home' })
+            // }
             this.$router.push({ name: 'Home' })
           }
         })

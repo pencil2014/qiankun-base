@@ -18,7 +18,7 @@ export function getInfo() {
 
 export function logout(data) {
   return request({
-    url: '/base/common/logout',
+    url: '/base/common/logoutV2',
     method: 'post',
     data
   })
@@ -112,6 +112,23 @@ export function resetPasswordByEmail(data) {
 export function checkCodeExpired(data) {
 	return request({
 		url: '/base/common/fgpw/checkCodeExpired',
+		method: 'post',
+		data
+	})
+}
+
+// 邮件订阅列表 /order/noticeGroup/subscribe/list
+export function getSubscribeList(data) {
+	return request({
+		url: '/order/noticeGroup/subscribe/list',
+		method: 'post',
+		data
+	})
+}
+// 取消订阅 /order/noticeGroup/unsubscribe
+export function unsubscribe(data) {
+	return request({
+		url: '/order/noticeGroup/unsubscribe',
 		method: 'post',
 		data
 	})

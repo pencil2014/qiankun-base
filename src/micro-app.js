@@ -11,6 +11,11 @@ const microApps = [
     name: 'adm',
     entry: process.env.VUE_APP_SUB_ADM,
     activeRule: getActiveRule2(['#/permission','#/baseData','#/companyResource','#/notice'])
+  },
+  {
+    name: 'sw',
+    entry: process.env.VUE_APP_SUB_SW,
+    activeRule: getActiveRule('#/sw')
   }
 ]
 const apps = microApps.map(item => {
@@ -21,7 +26,8 @@ const apps = microApps.map(item => {
       routerBase: item.activeRule, // 下发基础路由
       getGlobalState: actions.getGlobalState, // 下发getGlobalState方法
       addGlobalTag: actions.addGlobalTag,
-      setGlobalState: actions.setGlobalState
+      setGlobalState: actions.setGlobalState,
+      delGlobalTag: actions.delGlobalTag
     }
   }
 })

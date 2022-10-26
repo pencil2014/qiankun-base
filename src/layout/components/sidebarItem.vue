@@ -62,7 +62,7 @@ export default {
   },
   methods: {
     goSub(item) {
-      let { resourceName: title, resourceUrl: url, resourceCode: code } = item
+      let { resourceName: title, routeCode: url, resourceCode: code } = item // let { resourceName: title, resourceUrl: url, resourceCode: code } = item
       this.state.activeTag = { title, url, code }
       let codes = this.state.tags.map((ele) => ele.code)
       if (!codes.includes(code)) {

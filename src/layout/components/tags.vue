@@ -61,7 +61,7 @@ export default {
     $route(value) {
       // 新开tag
       let { url } = this.state.activeTag
-      let { fullPath, path, name } = value
+      let { fullPath, path, name, meta } = value
       if (url !== fullPath) {
         let tag = {}
         // 子应用
@@ -77,7 +77,7 @@ export default {
         } else {
           // 主应用
           tag = {
-            title: name,
+            title: meta.title,
             code: name,
             url: fullPath
           }
@@ -88,10 +88,11 @@ export default {
         actions.addGlobalTag(tag)
       }
       this.scrollToTag()
+      sessionStorage.setItem('store', JSON.stringify(this.state))
     }
   },
   methods: {
-    findRouter(routes, path) {
+    findRouter(routes=[], path) {
       let res = null
       routes.forEach((item) => {
         if (item.children) {
@@ -185,7 +186,7 @@ export default {
   overflow: auto;
   ul {
     display: flex;
-    padding-top: 4px;
+    padding-top: 5px;
     li {
       list-style: none;
       color: #fff;
@@ -195,9 +196,9 @@ export default {
       padding: 0 5px;
       flex-shrink: 0;
       i {
-        width: 16px;
-        height: 16px;
-        line-height: 16px;
+        width: 14px;
+        height: 14px;
+        line-height: 14px;
         border-radius: 50%;
         text-align: center;
       }

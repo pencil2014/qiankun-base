@@ -5,7 +5,6 @@
     </div>
     <div class="cnt-box">
       <div class="left-menu" :class="{ 'collapse-menu': state.isCollapse }">
-        <!-- -->
         <SideBar />
       </div>
       <div class="hamburger" @click="toggleMenu">
@@ -68,6 +67,10 @@ export default {
     }
   },
   mounted() {
+    let store = sessionStorage.getItem('store')
+    if (store) {
+      actions.setGlobalState(JSON.parse(store))
+    }
     this.state = actions.getGlobalState()
   }
 }

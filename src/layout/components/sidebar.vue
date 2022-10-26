@@ -89,52 +89,17 @@ export default {
     },
     getAllMenu() {
       this.loading = true
-      getMenu({ token: this.token, sysCode: 'wms,adm' })
+      getMenu({ token: this.token, sysCode: 'wms,adm,sw' })
         .then((res) => {
           if (res.code === 0) {
             let allMenu = res.data
             allMenu = this.generateMenusFrontWebMain(allMenu)
             this.allMenu = allMenu
             localStorage.setItem('allMenu', JSON.stringify(allMenu))
-            // 默认首页
-            let home = {
-              title: '首页',
-              code: 'Home',
-              url: '/home'
-            }
-            let tags = [{ ...home }]
-            let activeTag = { ...home }
-            let hash = location.hash.replace('#', '')
-            if (!['/home', '/userInfo', '/404'].includes(hash)) {
-              let find = this.searchTree(allMenu)
-              let {
-                resourceName: title,
-                resourceCode: code,
-                resourceUrl: url
-              } = find
-              activeTag = { title, code, url }
-              tags.push({ title, code, url })
-            } else {
-              if (hash === '/userInfo') {
-                let title = '个人信息'
-                let url = '/userInfo'
-                let code = 'UserInfo'
-                activeTag = {
-                  title,
-                  url,
-                  code
-                }
-                tags.push({ title, code, url })
-              } else if (hash === '/404') {
-                tags = [{ ...home }]
-                activeTag = {}
-              }
-            }
             actions.setGlobalState({
-              allMenu,
-              activeTag,
-              tags
+              allMenu
             })
+            this.searchTree(allMenu)
           }
         })
         .catch(() => {})
@@ -144,7 +109,18 @@ export default {
     },
     searchTree(allMenu) {
       let hash = location.hash.replace('#', '')
-      return this.recursionGet(allMenu, hash)
+      if (hash !== '/home') {
+        let source =  this.recursionGet(allMenu, hash)
+        let tag = {
+          title: source.resourceName,
+          code: source.resourceCode,
+          url: source.resourceUrl
+        }
+        actions.setGlobalState({
+          activeTag: tag
+        })
+        actions.addGlobalTag(tag)
+      }
     },
     // 递归获取菜单
     recursionGet(allMenu, url) {
@@ -155,7 +131,7 @@ export default {
           let res = this.recursionGet(sub, url)
           if (res) return res
         } else {
-          if (allMenu[index].resourceUrl === url) {
+          if (allMenu[index].routeCode === url) {
             value = allMenu[index]
             break
           }

@@ -6,27 +6,42 @@ const routes = [
   {
     path: '/login',
     name: 'Login',
-    component:() => import('@/components/login.vue')
+    component: () => import('@/components/login.vue'),
+    meta: {
+      title: '登录'
+    }
   },
   {
     path: '/forget',
     name: 'Forget',
-    component:() => import('@/components/forget.vue')
+    component: () => import('@/components/forget.vue'),
+    meta: {
+      title: '忘记密码'
+    }
   },
   {
     path: '/home',
     name: 'Home',
-    component: () => import('@/views/home.vue')
+    component: () => import('@/views/home.vue'),
+    meta: {
+      title: '首页'
+    }
   },
   {
     path: '/userInfo',
     name: 'UserInfo',
-    component: () => import('@/views/userInfo.vue')
+    component: () => import('@/views/userInfo.vue'),
+    meta: {
+      title: '个人信息'
+    }
   },
   {
     path: '/404',
     name: '404',
-    component: () => import('@/views/404.vue')
+    component: () => import('@/views/404.vue'),
+    meta: {
+      title: '404'
+    }
   }
 ]
 

@@ -4,8 +4,14 @@ const TerserPlugin = require('terser-webpack-plugin')
 function resolve(dir) {
   return path.join(__dirname, dir)
 }
+const publicPathObj = {
+  'development': '/web-main/',
+  'uat': '/web-main/',
+  'test': '/web-main/',
+  'production': '//cdnrs.longsailing.net/web-main/'
+}
 module.exports = defineConfig({
-  publicPath: '/web-main',
+  publicPath: publicPathObj[process.env.NODE_ENV] || '/web-main/',
   lintOnSave: false,
   transpileDependencies: true,
   productionSourceMap: false,
@@ -26,7 +32,7 @@ module.exports = defineConfig({
         pathRewrite: {
           '^/': ''
         }
-      }
+      },
     },
     headers: {
       'Access-Control-Allow-Origin': '*'

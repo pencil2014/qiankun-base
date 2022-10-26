@@ -1,5 +1,8 @@
 <template>
   <div class="navbar">
+    <el-button v-if="host !== 'lsuat.com'" size="mini" @click="gotoBigData"
+      >大禹数据平台</el-button
+    >
     <el-dropdown
       size="mini"
       class="avatar-container company-container"
@@ -7,7 +10,7 @@
       @command="refreshTokenFn"
     >
       <div class="avatar-wrapper company-wrapper">
-        <span>{{ compName }}</span>
+        <span class="company-name">{{ compName }}</span>
         <i class="el-icon-caret-bottom" />
       </div>
       <el-dropdown-menu slot="dropdown" class="user-dropdown company-dropdown">
@@ -47,6 +50,7 @@
         <el-dropdown-item @click.native="goHome">首页</el-dropdown-item>
         <el-dropdown-item @click.native="goUser">个人信息</el-dropdown-item>
         <el-dropdown-item @click.native="showPwd">修改密码</el-dropdown-item>
+        <el-dropdown-item @click.native="emailBook">邮件订阅</el-dropdown-item>
         <el-dropdown-item divided @click.native="logout">退出</el-dropdown-item>
       </el-dropdown-menu>
     </el-dropdown>
@@ -56,24 +60,36 @@
       @cancel="cancel"
       @submit="submit"
     />
+    <EmailBookPop
+      v-if="emailBookOption.show"
+      :option="emailBookOption"
+      @cancel="cancelEmail"
+    />
   </div>
 </template>
 
 <script>
 import sha256 from 'js-sha256'
 import actions from '@/store'
-import { logOut, setToken } from '@/utils'
+import { logOut, setToken, randomString } from '@/utils'
 import { refreshToken, updatePassWord } from '@/api'
 import ChangePassword from '@/components/changePassword'
+import EmailBookPop from '@/components/emailBookPop'
+import axios from 'axios'
 export default {
   components: {
-    ChangePassword
+    ChangePassword,
+    EmailBookPop
   },
   data() {
     return {
+      host: location.host,
       userInfo: {},
       state: {},
       diaologOption: {
+        show: false
+      },
+      emailBookOption: {
         show: false
       }
     }
@@ -157,6 +173,71 @@ export default {
         })
         .catch(() => {})
         .finally(() => {})
+    },
+    emailBook() {
+      this.emailBookOption.show = true
+    },
+    cancelEmail() {
+      this.emailBookOption.show = false
+    },
+    gotoBigData() {
+      // 协议会切换到https，动态获取协议再赋值
+      // hash: "#/dashboard"
+      // host: "localhost:7701"
+      // hostname: "localhost"
+      // href: "http://localhost:7701/#/dashboard"
+      // origin: "http://localhost:7701"
+      // pathname: "/"
+      // port: "7701"
+      // protocol: "http:"
+      let protocol = location.protocol
+      let host = location.hostname
+      let ip = ''
+      if (host === 'localhost') {
+        host = 'www.bigdata-test.com'
+        ip = '192.168.0.27:8100'
+      } else if (host === 'ls.com') {
+        host = 'www.bigdata-dev.com'
+        ip = '192.168.0.26:8100'
+      } else if (host === 'lstest.com') {
+        host = 'www.bigdata-test.com'
+        ip = '192.168.0.27:8100'
+      } else if (host === 'lsuat.com') {
+        host = 'www.bigdata-test.com'
+        ip = '192.168.0.27:8100'
+      } else {
+        // host = 'http://bigdata.longsailing.net:7777'
+        // ip = 'bigdata.longsailing.net:7777'
+        host = 'bigdata.longsailing.net'
+        ip = 'bigdata.longsailing.net'
+      }
+      // 跳转的腾讯云地址：http://81.71.10.108:8081/api-auth/oauth/authorize
+      // http://192.168.1.13:9001/InvSvr
+      let url = `${protocol}//${ip}/api-auth/oauth/authorize`
+      axios
+        .post(url, {
+          clientId: 'BusinessSystem',
+          clientSecret: 'admin',
+          responseType: 'code',
+          scope: ['all'],
+          state: randomString(),
+          businessToken: this.state.token
+        })
+        .then(({ data: res }) => {
+          if (res.code !== 0) {
+            return this.$msgErrClose(res.msg)
+          } else {
+            window.open(
+              `${protocol}//${host}/sign?token=${res.data.accessToken}&from=yw`
+            )
+          }
+          //         开发：http://www.bigdata-dev.com/sign?token=xxx&from=yw
+          // 测试：http://www.bigdata-test.com/sign?token=xxx&from=yw
+          // 生产：http://bigdata.longsailing.net:7777/sign?token=xxx&from=yw
+        })
+        .catch((error) => {
+          console.log(error)
+        })
     }
   },
   mounted() {
@@ -166,6 +247,9 @@ export default {
     }
     this.userInfo = userInfo
     this.state = actions.getGlobalState()
+    actions.onGlobalStateChange((sata,prev) => {
+      this.userInfo = state.userInfo
+    })
   }
 }
 </script>
@@ -182,6 +266,9 @@ export default {
     color: #fff;
     margin-left: 10px;
     cursor: pointer;
+    .company-name {
+      font-size: 12px;
+    }
     .name__container {
       display: flex;
       align-items: center;
@@ -198,7 +285,7 @@ export default {
 .user-dropdown {
   text-align: center;
 }
- :deep(.company-dropdown) {
+:deep(.company-dropdown) {
   .el-dropdown-menu__item {
     text-align: left;
   }
